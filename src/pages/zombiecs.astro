@@ -1,0 +1,626 @@
+---
+// ZombieCs 宣传页 —— CS2 社区插件，复刻 CSOL 经典生化玩法
+// 文档站入口：宣传页占用 `/`，Starlight 文档从 `/overview` 开始
+const DOCS_HOME = '/overview';
+
+const modes = [
+	{
+		id: 'zm1',
+		tag: 'MODE 01',
+		name: '生化模式 Ⅰ',
+		sub: '经典感染 · 起源之作',
+		accent: '#7ee23c',
+		desc: '一切恐惧的起点。回合开始随机母巢觉醒，被利爪击倒的人类将即刻转化为尸群一员。弹药有限、退路有限，守住最后的阵地，或者成为它们。',
+		feats: ['母体随机觉醒', '击杀即感染', '经典守点玩法', '击退与爆头判定'],
+	},
+	{
+		id: 'zm2',
+		tag: 'MODE 02',
+		name: '生化模式 Ⅱ',
+		sub: '进化狂潮 · 补给争夺',
+		accent: '#2fd4a7',
+		desc: '尸潮学会了进化。僵尸通过感染不断变异升级，获得更强的体魄与技能；人类则依靠空投补给与强化武器殊死一搏。进化的天平，由你亲手打破。',
+		feats: ['僵尸多阶段进化', '空投补给箱', '强化武器系统', '技能型变异体'],
+	},
+	{
+		id: 'zm3',
+		tag: 'MODE 03',
+		name: '生化模式 Ⅲ',
+		sub: '英雄降临 · 背水一战',
+		accent: '#ffb02e',
+		desc: '当幸存者的怒吼响彻战场，英雄应运而生。残局时刻人类可觉醒为英雄单位，手持专属神器逆转战局；尸群则以滔天怒气回应——最后的对决，没有退路。',
+		feats: ['英雄觉醒系统', '专属英雄武器', '僵尸怒气爆发', '终局逆转机制'],
+	},
+	{
+		id: 'zmz',
+		tag: 'MODE Z',
+		name: '生化模式 Z',
+		sub: '无限进化 · 随机觉醒',
+		accent: '#c86bff',
+		desc: '每一局，都是全新的基因序列。等级成长搭配随机觉醒的变异能力，跳跃强化、神速、钢铁之躯……数十种能力自由组合，打造只属于你的终极变异体。',
+		feats: ['局内等级成长', '随机变异能力池', '能力自由组合', '每局全新体验'],
+	},
+	{
+		id: 'zmu',
+		tag: 'UNION WAR',
+		name: '生化盟战',
+		sub: '阵营对决 · 全面开战',
+		accent: '#ff4d4d',
+		desc: '不再是逃与追的猫鼠游戏。人类军团与尸潮阵营正面碰撞，占领据点、击杀敌方、滚起雪球。这是属于两大阵营的全面战争——盟战已启，选边站队。',
+		feats: ['双阵营大规模团战', '据点占领机制', '阵营科技成长', 'AI 尸潮协同作战'],
+	},
+];
+
+const highlights = [
+	{ title: 'CS2 原生体验', desc: '基于 Counter-Strike 2 社区服务器框架深度定制，低延迟、高帧率，画质全面进化。' },
+	{ title: 'SwiftlyS2 驱动', desc: '构建于现代 C# 框架 SwiftlyS2 之上，直接调用 Source 2 原生接口，性能与内存安全兼得。' },
+	{ title: '五大经典玩法', desc: '生化 1/2/3、生化 Z、生化盟战一次集齐，CSOL 老玩家的青春全部还给你。' },
+	{ title: '持续更新', desc: '地图、武器、僵尸模型与平衡性持续迭代，社区反馈直达开发组。' },
+	{ title: '公平竞技', desc: '无数值付费，所有强度靠枪法与策略说话，绿色公平的游戏环境。' },
+	{ title: '开源友好', desc: '与 SwiftlyS2 生态一致，支持热重载、数据库、多语言与丰富的事件钩子。' },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<title>ZombieCs — CS2 生化模式社区插件</title>
+		<meta
+			name="description"
+			content="ZombieCs 是一款 CS2 社区服务器插件，参考 CSOL 生化模式1、生化模式2、生化模式3、生化模式Z 与生化盟战。"
+		/>
+		<style>
+			:root {
+				--bg: #0a0d08;
+				--bg2: #10150c;
+				--toxic: #7ee23c;
+				--blood: #ff3b3b;
+				--text: #e8f0e0;
+				--muted: #9aa88e;
+			}
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			html {
+				scroll-behavior: smooth;
+			}
+			body {
+				background: var(--bg);
+				color: var(--text);
+				font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', system-ui, sans-serif;
+				overflow-x: hidden;
+			}
+
+			/* ===== 背景氛围 ===== */
+			.atmosphere {
+				position: fixed;
+				inset: 0;
+				z-index: -2;
+				background:
+					radial-gradient(ellipse 80% 50% at 50% -10%, rgba(126, 226, 60, 0.14), transparent),
+					radial-gradient(ellipse 60% 40% at 85% 100%, rgba(255, 59, 59, 0.08), transparent),
+					linear-gradient(180deg, #0a0d08 0%, #0c110a 50%, #080a07 100%);
+			}
+			.scanlines {
+				position: fixed;
+				inset: 0;
+				z-index: -1;
+				pointer-events: none;
+				background: repeating-linear-gradient(
+					0deg,
+					transparent 0 2px,
+					rgba(0, 0, 0, 0.12) 2px 4px
+				);
+				opacity: 0.5;
+			}
+
+			/* ===== 置顶开发中横幅 ===== */
+			.wip-bar {
+				position: sticky;
+				top: 0;
+				z-index: 20;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.6rem;
+				padding: 0.6rem 1rem;
+				text-align: center;
+				font-size: 0.85rem;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				color: #1a1206;
+				background: linear-gradient(90deg, #ffd34d, #ffb02e 45%, #ffd34d);
+				background-size: 200% 100%;
+				box-shadow: 0 2px 18px rgba(255, 176, 46, 0.45);
+				animation: wip-flow 4s linear infinite;
+			}
+			.wip-bar .dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: #b3261e;
+				box-shadow: 0 0 10px rgba(179, 38, 30, 0.9);
+				animation: wip-blink 1.2s ease-in-out infinite;
+			}
+			@keyframes wip-flow {
+				0% {
+					background-position: 0% 0;
+				}
+				100% {
+					background-position: 200% 0;
+				}
+			}
+			@keyframes wip-blink {
+				0%,
+				100% {
+					opacity: 1;
+				}
+				50% {
+					opacity: 0.25;
+				}
+			}
+			@media (prefers-reduced-motion: reduce) {
+				.wip-bar,
+				.wip-bar .dot {
+					animation: none;
+				}
+			}
+
+			/* ===== 顶部导航 ===== */
+			nav {
+				position: sticky;
+				top: 34px;
+				z-index: 10;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 1rem 4vw;
+				background: rgba(10, 13, 8, 0.82);
+				backdrop-filter: blur(10px);
+				border-bottom: 1px solid rgba(126, 226, 60, 0.18);
+			}
+			.logo {
+				font-size: 1.35rem;
+				font-weight: 900;
+				letter-spacing: 0.06em;
+				text-decoration: none;
+				color: var(--text);
+			}
+			.logo em {
+				font-style: normal;
+				color: var(--toxic);
+				text-shadow: 0 0 18px rgba(126, 226, 60, 0.7);
+			}
+			.nav-links {
+				display: flex;
+				gap: 1.6rem;
+				list-style: none;
+			}
+			.nav-links a {
+				color: var(--muted);
+				text-decoration: none;
+				font-size: 0.92rem;
+				transition: color 0.2s;
+			}
+			.nav-links a:hover {
+				color: var(--toxic);
+			}
+			@media (max-width: 720px) {
+				.nav-links {
+					display: none;
+				}
+			}
+
+			/* ===== Hero ===== */
+			.hero {
+				position: relative;
+				min-height: 92vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+				padding: 4rem 5vw 5rem;
+			}
+			.biohazard {
+				width: 92px;
+				height: 92px;
+				margin-bottom: 1.6rem;
+				filter: drop-shadow(0 0 22px rgba(126, 226, 60, 0.65));
+				animation: pulse 3.2s ease-in-out infinite;
+			}
+			@keyframes pulse {
+				0%,
+				100% {
+					transform: scale(1);
+					opacity: 0.9;
+				}
+				50% {
+					transform: scale(1.07);
+					opacity: 1;
+				}
+			}
+			.hero-badge {
+				font-size: 0.82rem;
+				letter-spacing: 0.35em;
+				color: var(--toxic);
+				border: 1px solid rgba(126, 226, 60, 0.45);
+				border-radius: 999px;
+				padding: 0.45rem 1.2rem 0.45rem 1.55rem;
+				margin-bottom: 1.4rem;
+				background: rgba(126, 226, 60, 0.07);
+			}
+			.hero h1 {
+				font-size: clamp(3rem, 10vw, 7rem);
+				font-weight: 900;
+				line-height: 1.02;
+				letter-spacing: 0.02em;
+				background: linear-gradient(92deg, #f2ffe2 20%, var(--toxic) 55%, #3f8f1d 90%);
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+				text-shadow: 0 0 60px rgba(126, 226, 60, 0.25);
+			}
+			.hero h1 .blood {
+				background: linear-gradient(92deg, #ff8a5c, var(--blood) 60%, #a3121b);
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+			}
+			.hero p.slogan {
+				margin-top: 1.4rem;
+				max-width: 720px;
+				font-size: clamp(1rem, 2.2vw, 1.3rem);
+				color: var(--muted);
+				line-height: 1.8;
+			}
+			.hero p.slogan strong {
+				color: var(--text);
+			}
+			.cta-row {
+				margin-top: 2.6rem;
+				display: flex;
+				gap: 1rem;
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+			.btn {
+				display: inline-block;
+				padding: 0.95rem 2.4rem;
+				border-radius: 6px;
+				font-weight: 700;
+				font-size: 1rem;
+				text-decoration: none;
+				letter-spacing: 0.08em;
+				transition:
+					transform 0.18s,
+					box-shadow 0.18s;
+			}
+			.btn-primary {
+				background: linear-gradient(135deg, var(--toxic), #4ea81f);
+				color: #0b1206;
+				box-shadow: 0 0 26px rgba(126, 226, 60, 0.35);
+			}
+			.btn-primary:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 0 40px rgba(126, 226, 60, 0.55);
+			}
+			.btn-ghost {
+				border: 1px solid rgba(232, 240, 224, 0.3);
+				color: var(--text);
+			}
+			.btn-ghost:hover {
+				border-color: var(--toxic);
+				color: var(--toxic);
+			}
+			.scroll-hint {
+				position: absolute;
+				bottom: 1.8rem;
+				left: 50%;
+				transform: translateX(-50%);
+				color: var(--muted);
+				font-size: 0.78rem;
+				letter-spacing: 0.3em;
+				animation: bob 2s ease-in-out infinite;
+			}
+			@keyframes bob {
+				0%,
+				100% {
+					transform: translate(-50%, 0);
+				}
+				50% {
+					transform: translate(-50%, 8px);
+				}
+			}
+
+			/* ===== 通用分区 ===== */
+			section {
+				padding: 5rem 5vw;
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+			.section-head {
+				text-align: center;
+				margin-bottom: 3.2rem;
+			}
+			.section-head .kicker {
+				font-size: 0.8rem;
+				letter-spacing: 0.4em;
+				color: var(--toxic);
+			}
+			.section-head h2 {
+				margin-top: 0.6rem;
+				font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+				font-weight: 900;
+			}
+			.section-head p {
+				margin-top: 0.8rem;
+				color: var(--muted);
+				font-size: 1rem;
+			}
+
+			/* ===== 模式卡片 ===== */
+			.mode {
+				position: relative;
+				display: grid;
+				grid-template-columns: 220px 1fr;
+				gap: 2rem;
+				margin-bottom: 2.2rem;
+				padding: 2.2rem 2.4rem;
+				border-radius: 14px;
+				background: linear-gradient(135deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008));
+				border: 1px solid rgba(255, 255, 255, 0.09);
+				overflow: hidden;
+				transition:
+					transform 0.25s,
+					border-color 0.25s,
+					box-shadow 0.25s;
+			}
+			.mode:hover {
+				transform: translateY(-4px);
+				border-color: var(--accent);
+				box-shadow: 0 12px 44px -12px var(--accent);
+			}
+			.mode::before {
+				content: '';
+				position: absolute;
+				inset: 0 auto 0 0;
+				width: 4px;
+				background: var(--accent);
+				box-shadow: 0 0 18px var(--accent);
+			}
+			.mode-side {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				border-right: 1px dashed rgba(255, 255, 255, 0.12);
+				padding-right: 1.6rem;
+			}
+			.mode-tag {
+				font-size: 0.72rem;
+				letter-spacing: 0.3em;
+				color: var(--accent);
+			}
+			.mode-name {
+				margin-top: 0.5rem;
+				font-size: 1.9rem;
+				font-weight: 900;
+				color: var(--accent);
+				text-shadow: 0 0 24px color-mix(in srgb, var(--accent) 55%, transparent);
+			}
+			.mode-sub {
+				margin-top: 0.5rem;
+				font-size: 0.85rem;
+				color: var(--muted);
+				letter-spacing: 0.12em;
+			}
+			.mode-body p {
+				line-height: 1.9;
+				color: #cdd8c2;
+				font-size: 0.98rem;
+			}
+			.mode-feats {
+				margin-top: 1.2rem;
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.6rem;
+				list-style: none;
+			}
+			.mode-feats li {
+				font-size: 0.82rem;
+				padding: 0.35rem 0.9rem;
+				border-radius: 999px;
+				border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+				color: var(--accent);
+				background: color-mix(in srgb, var(--accent) 9%, transparent);
+			}
+			@media (max-width: 760px) {
+				.mode {
+					grid-template-columns: 1fr;
+					gap: 1.2rem;
+					padding: 1.6rem;
+				}
+				.mode-side {
+					border-right: none;
+					border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+					padding: 0 0 1rem;
+				}
+			}
+
+			/* ===== 特色 ===== */
+			.features {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+				gap: 1.4rem;
+			}
+			.feature {
+				padding: 1.8rem;
+				border-radius: 12px;
+				background: var(--bg2);
+				border: 1px solid rgba(126, 226, 60, 0.14);
+				transition:
+					transform 0.2s,
+					border-color 0.2s;
+			}
+			.feature:hover {
+				transform: translateY(-4px);
+				border-color: rgba(126, 226, 60, 0.5);
+			}
+			.feature h3 {
+				font-size: 1.1rem;
+				color: var(--toxic);
+				margin-bottom: 0.7rem;
+			}
+			.feature p {
+				font-size: 0.9rem;
+				color: var(--muted);
+				line-height: 1.8;
+			}
+
+			/* ===== CTA 尾部 ===== */
+			.final-cta {
+				text-align: center;
+				padding: 6rem 5vw 7rem;
+				background:
+					radial-gradient(ellipse 60% 70% at 50% 100%, rgba(126, 226, 60, 0.12), transparent),
+					transparent;
+			}
+			.final-cta h2 {
+				font-size: clamp(1.9rem, 5vw, 3rem);
+				font-weight: 900;
+			}
+			.final-cta h2 span {
+				color: var(--blood);
+				text-shadow: 0 0 30px rgba(255, 59, 59, 0.5);
+			}
+			.final-cta p {
+				margin: 1.2rem auto 2.4rem;
+				max-width: 620px;
+				color: var(--muted);
+				line-height: 1.9;
+			}
+			footer {
+				padding: 2rem 5vw 3rem;
+				text-align: center;
+				color: #5f6b58;
+				font-size: 0.82rem;
+				border-top: 1px solid rgba(255, 255, 255, 0.06);
+			}
+			footer a {
+				color: var(--muted);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="atmosphere"></div>
+		<div class="scanlines"></div>
+
+		<div class="wip-bar">
+			<span class="dot"></span>
+			<span>正在开发中~ 玩法内容持续更新，敬请期待</span>
+		</div>
+
+		<nav>
+			<a class="logo" href="/">ZOMBIE<em>CS</em></a>
+			<ul class="nav-links">
+				<li><a href="#modes">游戏模式</a></li>
+				<li><a href="#features">插件特色</a></li>
+				<li><a href={DOCS_HOME}>插件文档</a></li>
+				<li><a href="#join">立即加入</a></li>
+			</ul>
+		</nav>
+
+		<header class="hero">
+			<svg class="biohazard" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+				<circle cx="50" cy="50" r="7" fill="#7ee23c"></circle>
+				<path
+					d="M50 10a14 14 0 0 1 14 14c0 5-2.5 9-6 11.5A20 20 0 0 0 50 32a20 20 0 0 0-8 3.5C38.5 33 36 29 36 24a14 14 0 0 1 14-14Z"
+					fill="#7ee23c"></path>
+				<path
+					d="M15.3 70a14 14 0 0 1 1.8-19.8c4-3.4 9.3-4 13.5-2A20 20 0 0 0 39 57.5a20 20 0 0 0 1.5 8.6c-4.6 2-6.6 5.6-5.4 10.4a14 14 0 0 1-19.8-6.5Z"
+					fill="#7ee23c"></path>
+				<path
+					d="M84.7 70a14 14 0 0 0-1.8-19.8c-4-3.4-9.3-4-13.5-2A20 20 0 0 1 61 57.5a20 20 0 0 1-1.5 8.6c4.6 2 6.6 5.6 5.4 10.4A14 14 0 0 0 84.7 70Z"
+					fill="#7ee23c"></path>
+				<circle cx="50" cy="50" r="16" stroke="#7ee23c" stroke-width="3" opacity="0.55"></circle>
+			</svg>
+			<div class="hero-badge">SWIFTLYS2 · CS2 社区服务器插件</div>
+			<h1>ZOMBIE<span class="blood">CS</span></h1>
+			<p class="slogan">
+				在 <strong>Counter-Strike 2</strong> 的战场上，
+				<strong>生化模式 1 / 2 / 3</strong>、<strong>生化模式 Z</strong>、<strong>生化盟战</strong>，
+				五大经典玩法。基于 <strong>SwiftlyS2</strong> 框架开发，尸潮再起，无处可逃。
+			</p>
+			<div class="cta-row">
+				<a class="btn btn-primary" href="#join">加入战场</a>
+				<a class="btn btn-ghost" href="#modes">查看游戏模式</a>
+			</div>
+			<div class="scroll-hint">▼ 向下滚动 ▼</div>
+		</header>
+
+		<section id="modes">
+			<div class="section-head">
+				<div class="kicker">GAME MODES</div>
+				<h2>五大生化玩法 · 经典感染</h2>
+				<p>从最初的原点守夜，到阵营全面开战——你记忆中的每一种尸潮，都在这里。</p>
+			</div>
+			{
+				modes.map((m) => (
+					<article class="mode" id={m.id} style={`--accent:${m.accent}`}>
+						<div class="mode-side">
+							<span class="mode-tag">{m.tag}</span>
+							<span class="mode-name">{m.name}</span>
+							<span class="mode-sub">{m.sub}</span>
+						</div>
+						<div class="mode-body">
+							<p>{m.desc}</p>
+							<ul class="mode-feats">
+								{m.feats.map((f) => (
+									<li>{f}</li>
+								))}
+							</ul>
+						</div>
+					</article>
+				))
+			}
+		</section>
+
+		<section id="features">
+			<div class="section-head">
+				<div class="kicker">WHY ZOMBIECS</div>
+				<h2>不止是复刻，更是进化</h2>
+			</div>
+			<div class="features">
+				{
+					highlights.map((h) => (
+						<div class="feature">
+							<h3>{h.title}</h3>
+							<p>{h.desc}</p>
+						</div>
+					))
+				}
+			</div>
+		</section>
+
+		<section class="final-cta" id="join">
+			<h2>尸潮已至，<span>你准备好了吗？</span></h2>
+			<p>
+				搜索社区服务器浏览器中的「ZombieCs」，即刻加入这场跨越十年的生化盛宴。
+				无论是死守到最后的人类，还是撕碎一切的尸王——传奇，由你书写。
+			</p>
+			<div class="cta-row">
+				<a class="btn btn-primary" href={DOCS_HOME}>查看插件文档</a>
+				<a class="btn btn-ghost" href="#">加入社区讨论</a>
+			</div>
+		</section>
+
+		<footer>
+			ZombieCs — 基于 SwiftlyS2 框架的 CS2 社区插件 · 本页面仅供玩家社区宣传使用
+		</footer>
+	</body>
+</html>

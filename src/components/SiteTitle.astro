@@ -1,0 +1,26 @@
+---
+// 覆盖 Starlight 的 SiteTitle：站点根 `/` 是宣传落地页，
+// 因此把文档站左上角标题指向文档介绍页 `/overview`。
+const { title } = Astro.locals.starlightRoute.siteTitle ?? {};
+---
+
+<a href="/overview" class="site-title sl-flex">
+	<span class="sl-flex astro-site-title">{title}</span>
+</a>
+
+<style>
+	.site-title {
+		align-items: center;
+		gap: var(--sl-nav-gap);
+		font-size: var(--sl-text-h4);
+		font-weight: 600;
+		color: var(--sl-color-white);
+		text-decoration: none;
+	}
+
+	@media (min-width: 50rem) {
+		.site-title {
+			font-size: var(--sl-text-h3);
+		}
+	}
+</style>

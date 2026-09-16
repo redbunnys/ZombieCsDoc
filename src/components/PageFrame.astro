@@ -1,0 +1,201 @@
+---
+// 覆盖 Starlight 的 PageFrame：
+// 在整页最顶端（固定顶栏之上）插入「正在开发中」提示条；
+// 并把 Starlight 依赖 --sl-nav-height 的定位整体下移提示条高度。
+import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle';
+
+const { hasSidebar } = Astro.locals.starlightRoute;
+---
+
+<div class="page sl-flex">
+	<div class="sl-top-banner" data-pagefind-ignore>
+		<span class="sl-top-banner-dot" aria-hidden="true"></span>
+		<span>正在开发中~ 插件功能与文档持续更新，内容仅供参考</span>
+	</div>
+
+	<header class="header"><slot name="header" /></header>
+	{
+		hasSidebar && (
+			<nav class="sidebar print:hidden" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
+				<MobileMenuToggle />
+				<script>
+					// The mobile menu uses the popover API to open and close without JavaScript. We enhance this
+					// behaviour with focus trapping while the menu is open.
+					class StarlightSidebarPane extends HTMLElement {
+						constructor() {
+							super();
+
+							const desktopMediaQuery = matchMedia('(min-width: 50em)');
+
+							// Remove the popover attribute on desktop viewports. It's only needed for the mobile menu.
+							const resetPopoverAttribute = () => {
+								this.popover = desktopMediaQuery.matches ? null : 'auto';
+							};
+							resetPopoverAttribute();
+							desktopMediaQuery.addEventListener('change', () => resetPopoverAttribute());
+
+							// Update the menu state when the sidebar popover is toggled.
+							this.addEventListener('toggle', ({ newState }) => this.trapFocus(newState === 'open'));
+						}
+						/** Trap keyboard focus inside the header and menu when the menu is expanded. */
+						trapFocus(shouldTrap: boolean) {
+							document.querySelectorAll<HTMLElement>('.main-frame, .sl-skip-link').forEach((el) => {
+								el.toggleAttribute('inert', shouldTrap);
+							});
+						}
+					}
+					customElements.define('sl-sidebar-pane', StarlightSidebarPane);
+				</script>
+				<sl-sidebar-pane popover="" id="starlight__sidebar" class="sidebar-pane">
+					<div class="sidebar-content sl-flex">
+						<slot name="sidebar" />
+					</div>
+				</sl-sidebar-pane>
+			</nav>
+		)
+	}
+	<div class="main-frame"><slot /></div>
+</div>
+
+<style>
+	/* 提示条高度，供各固定元素的偏移计算复用 */
+	:root {
+		--sl-top-banner-height: 34px;
+	}
+
+	@layer starlight.core {
+		.page {
+			flex-direction: column;
+			min-height: 100vh;
+		}
+
+		/* 顶栏整体下移提示条高度，避免遮挡 */
+		.header {
+			z-index: var(--sl-z-index-navbar);
+			position: fixed;
+			inset-inline-start: 0;
+			inset-block-start: var(--sl-top-banner-height);
+			width: 100%;
+			height: var(--sl-nav-height);
+			border-bottom: 1px solid var(--sl-color-hairline-shade);
+			padding: var(--sl-nav-pad-y) var(--sl-nav-pad-x);
+			padding-inline-end: var(--sl-nav-pad-x);
+			background-color: var(--sl-color-bg-nav);
+		}
+
+		:global([data-has-sidebar]) .header {
+			padding-inline-end: calc(
+				var(--sl-nav-gap) + var(--sl-nav-pad-x) + var(--sl-menu-button-size)
+			);
+		}
+
+		/* 侧栏与内容区同步下移 */
+		.sidebar-pane {
+			border: unset;
+			padding: unset;
+			height: unset;
+			color: unset;
+
+			position: fixed;
+			z-index: var(--sl-z-index-menu);
+			inset-block: calc(var(--sl-nav-height) + var(--sl-top-banner-height)) 0;
+			inset-inline-start: 0;
+			width: 100%;
+			background-color: var(--sl-color-black);
+			overflow-y: auto;
+			scrollbar-gutter: stable;
+		}
+
+		.sidebar-content {
+			height: 100%;
+			min-height: max-content;
+			padding: 1rem var(--sl-sidebar-pad-x) 0;
+			flex-direction: column;
+			gap: 1rem;
+		}
+
+		@media (min-width: 50rem) {
+			.sidebar-content::after {
+				content: '';
+				padding-bottom: 1px;
+			}
+		}
+
+		.main-frame {
+			padding-top: calc(var(--sl-nav-height) + var(--sl-mobile-toc-height) + var(--sl-top-banner-height));
+			padding-inline-start: var(--sl-content-inline-start);
+		}
+
+		@media (min-width: 50rem) {
+			:global([data-has-sidebar]) .header {
+				padding-inline-end: var(--sl-nav-pad-x);
+			}
+			.sidebar-pane {
+				display: block;
+				width: var(--sl-sidebar-width);
+				background-color: var(--sl-color-bg-sidebar);
+				border-inline-end: 1px solid var(--sl-color-hairline-shade);
+			}
+		}
+	}
+</style>
+
+<style is:global>
+	/* 页面最顶端的「正在开发中」提示条 */
+	.sl-top-banner {
+		position: fixed;
+		inset: 0 0 auto 0;
+		z-index: calc(var(--sl-z-index-navbar) + 10);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		height: var(--sl-top-banner-height);
+		padding: 0 1rem;
+		font-size: 0.8rem;
+		font-weight: 700;
+		letter-spacing: 0.06em;
+		color: #1a1206;
+		text-align: center;
+		background: linear-gradient(90deg, #ffd34d, #ffb02e 45%, #ffd34d);
+		background-size: 200% 100%;
+		box-shadow: 0 2px 14px rgba(255, 176, 46, 0.45);
+		animation: sl-top-banner-flow 4s linear infinite;
+	}
+
+	.sl-top-banner-dot {
+		width: 7px;
+		height: 7px;
+		flex: none;
+		border-radius: 50%;
+		background: #b3261e;
+		box-shadow: 0 0 10px rgba(179, 38, 30, 0.9);
+		animation: sl-top-banner-blink 1.2s ease-in-out infinite;
+	}
+
+	@keyframes sl-top-banner-flow {
+		0% {
+			background-position: 0% 0;
+		}
+		100% {
+			background-position: 200% 0;
+		}
+	}
+
+	@keyframes sl-top-banner-blink {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.25;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.sl-top-banner,
+		.sl-top-banner-dot {
+			animation: none;
+		}
+	}
+</style>
