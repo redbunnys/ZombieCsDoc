@@ -95,23 +95,37 @@ npm run deploy            # = npm run build && wrangler deploy
 3. 纯静态构建不走 browser 解析分支，所以此前不会暴露；Cloudflare 适配器会把页面
    打包成 worker，Vite 按 browser 条件解析，于是命中缺失模块。
 
-**解法**：仓库已在 `postinstall` 中自动补装。关键在于必须带 `--cpu=wasm32`：
-
-```sh
-npm install @bruits/satteri-wasm32-wasi --no-save --force --ignore-scripts --cpu=wasm32
-```
-
-> 仅写进 `package.json` 的 `optionalDependencies` **不够** —— npm 会认为版本已满足
-> 而直接跳过；只加 `--force` 也**不够**，仍需 `--cpu=wasm32` 绕过平台校验。
+**解法**：仓库已在 `postinstall` 中自动补装（`scripts/ensure-satteri-wasm.mjs`），
+脚本会从 npm registry 解析 tarball 地址、下载并解压到
+`node_modules/@bruits/satteri-wasm32-wasi/`，全程只写这一个目录。
 
 该包为纯 WASM，跨平台通用，在任意平台安装均安全。
+
+#### ⚠️ 不要用 `npm install --cpu=wasm32`
+
+早期实现使用 `npm install <pkg> --cpu=wasm32`，**已在云构建环境上翻车，请勿改回**。
+
+`--cpu=wasm32` 会覆盖该次 npm 进程的**全局** CPU 判定，而构建机是 x64。npm 因此把所有
+「平台不匹配」的原生绑定当作冗余清除 —— 实测在 Cloudflare Workers Builds 上连带删除
+16 个包（含 `@rolldown/binding-linux-x64-gnu`），随后 `astro build` 直接失败：
+
+```text
+Error: Cannot find native binding.
+Cannot find module '@rolldown/binding-wasm32-wasi'
+Cannot find module './rolldown-binding.wasi.cjs'
+```
+
+下载 tarball 直解的方式不经过 npm 的依赖树求解，因此不存在这个连坐问题。
+
+> 另注：仅写进 `package.json` 的 `optionalDependencies` 也**不够** —— npm 会认为
+> 版本已满足而直接跳过，不落盘。
 
 ## 项目结构
 
 ```text
 ├── public/                       静态资源（favicon 等）
 ├── scripts/
-│   └── ensure-satteri-wasm.mjs   postinstall 补装 satteri WASM 绑定
+│   └── ensure-satteri-wasm.mjs   postinstall 补装 satteri WASM 绑定（下载 tarball 直解）
 ├── src/
 │   ├── components/               覆盖的 Starlight 组件
 │   │   ├── PageFrame.astro       顶部「正在开发中」提示条（固定在最顶端）
