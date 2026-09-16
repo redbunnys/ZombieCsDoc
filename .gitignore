@@ -2,6 +2,10 @@
 dist/
 # generated types
 .astro/
+# wrangler local state & dry-run output
+.wrangler/
+# generated Cloudflare env types
+worker-configuration.d.ts
 
 # dependencies
 node_modules/

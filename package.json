@@ -9,9 +9,17 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "generate-types": "wrangler types",
+    "postinstall": "node scripts/ensure-satteri-wasm.mjs",
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:dry-run": "npm run build && wrangler deploy --dry-run --outdir=.wrangler/dry-run",
+    "cf:preview": "npm run build && wrangler dev",
+    "cf:login": "wrangler login",
+    "cf:whoami": "wrangler whoami"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.3.1",
     "@astrojs/mdx": "^8.0.1",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
@@ -22,5 +30,11 @@
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "optionalDependencies": {
+    "@bruits/satteri-wasm32-wasi": "0.10.5"
+  },
+  "devDependencies": {
+    "wrangler": "^4.132.0"
   }
 }

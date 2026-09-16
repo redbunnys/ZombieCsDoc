@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import starlightThemeFlexoki from 'starlight-theme-flexoki';
+import cloudflare from '@astrojs/cloudflare';
 
 // https://astro.build/config
 export default defineConfig({
@@ -61,4 +62,9 @@ export default defineConfig({
 		}),
 		sitemap(),
 	],
+
+	// Cloudflare Workers 部署适配器（配置见 wrangler.jsonc）
+	// 注意：启用后必须确保 satteri 的 WASM 绑定已安装，
+	// 见 scripts/ensure-satteri-wasm.mjs 与 README「已知问题」。
+	adapter: cloudflare(),
 });
