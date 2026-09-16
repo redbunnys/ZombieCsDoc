@@ -5,12 +5,18 @@
 import MobileMenuToggle from 'virtual:starlight/components/MobileMenuToggle';
 
 const { hasSidebar } = Astro.locals.starlightRoute;
+
+// 顶栏提示文案按当前语言切换
+const isZh = (Astro.currentLocale ?? 'zh-CN').startsWith('zh');
+const notice = isZh
+	? '正在开发中~ 插件功能与文档持续更新，内容仅供参考'
+	: 'Under development — features and docs are being updated, for reference only';
 ---
 
 <div class="page sl-flex">
 	<div class="sl-top-banner" data-pagefind-ignore>
 		<span class="sl-top-banner-dot" aria-hidden="true"></span>
-		<span>正在开发中~ 插件功能与文档持续更新，内容仅供参考</span>
+		<span>{notice}</span>
 	</div>
 
 	<header class="header"><slot name="header" /></header>

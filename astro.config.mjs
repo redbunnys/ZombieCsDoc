@@ -23,22 +23,38 @@ export default defineConfig({
 			},
 			// 文档导航中提供返回宣传页的入口
 			social: [{ icon: 'external', label: '宣传页', href: '/' }],
+			// 国际化：中文为默认语言（无路径前缀），英文位于 /en/
+			defaultLocale: 'root',
 			locales: {
 				root: {
 					label: '简体中文',
 					lang: 'zh-CN',
 				},
+				en: {
+					label: 'English',
+					lang: 'en',
+				},
 			},
 			sidebar: [
 				{
 					label: '开始',
+					translations: { en: 'Getting Started' },
 					items: [
-						{ label: '插件介绍', slug: 'overview' },
-						{ label: '安装指南', slug: 'guides/installation' },
+						{
+							label: '插件介绍',
+							translations: { en: 'Introduction' },
+							slug: 'overview',
+						},
+						{
+							label: '安装指南',
+							translations: { en: 'Installation' },
+							slug: 'guides/installation',
+						},
 					],
 				},
 				{
 					label: '游戏模式',
+					translations: { en: 'Game Modes' },
 					items: [{ autogenerate: { directory: 'modes' } }],
 				},
 			],
