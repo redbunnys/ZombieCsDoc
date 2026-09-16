@@ -1,77 +1,182 @@
 ---
 // ZombieCs 宣传页 —— CS2 社区插件，复刻 CSOL 经典生化玩法
 // 文档站入口：宣传页占用 `/`，Starlight 文档从 `/overview` 开始
-const DOCS_HOME = '/overview';
+// 支持中英双语：`/` 为中文，`/en/` 为英文（由 pages/en/index.astro 传入 lang="en"）
+interface Props {
+	lang?: 'zh' | 'en';
+}
+const { lang = 'zh' } = Astro.props;
+const isZh = lang === 'zh';
+
+// 同页面的另一语言地址，用于语言切换
+const ALT_HREF = isZh ? '/en/' : '/';
+const DOCS_HOME = isZh ? '/overview' : '/en/overview';
+
+// 语言切换按钮文案：始终「当前语言高亮 + 另一语言可点」
+const LANG_CURRENT = isZh ? '中文' : 'EN';
+const LANG_CURRENT_HTML_LANG = isZh ? 'zh-CN' : 'en';
+const LANG_OTHER = isZh ? 'EN' : '中文';
+const LANG_OTHER_HTML_LANG = isZh ? 'en' : 'zh-CN';
 
 const modes = [
 	{
 		id: 'zm1',
 		tag: 'MODE 01',
-		name: '生化模式 Ⅰ',
-		sub: '经典感染 · 起源之作',
+		name: isZh ? '生化模式 Ⅰ' : 'Zombie Mode Ⅰ',
+		sub: isZh ? '经典感染 · 起源之作' : 'Classic Infection · Where It Began',
 		accent: '#7ee23c',
-		desc: '一切恐惧的起点。回合开始随机母巢觉醒，被利爪击倒的人类将即刻转化为尸群一员。弹药有限、退路有限，守住最后的阵地，或者成为它们。',
-		feats: ['母体随机觉醒', '击杀即感染', '经典守点玩法', '击退与爆头判定'],
+		desc: isZh
+			? '一切恐惧的起点。回合开始随机母巢觉醒，被利爪击倒的人类将即刻转化为尸群一员。弹药有限、退路有限，守住最后的阵地，或者成为它们。'
+			: 'The origin of every fear. A random host awakens at round start, and any human cut down by its claws joins the horde instantly. Limited ammo, no retreat — hold the last position, or become one of them.',
+		feats: isZh
+			? ['母体随机觉醒', '击杀即感染', '经典守点玩法', '击退与爆头判定']
+			: ['Random host awakening', 'Kill-to-infect', 'Classic holdout gameplay', 'Knockback & headshot rules'],
 	},
 	{
 		id: 'zm2',
 		tag: 'MODE 02',
-		name: '生化模式 Ⅱ',
-		sub: '进化狂潮 · 补给争夺',
+		name: isZh ? '生化模式 Ⅱ' : 'Zombie Mode Ⅱ',
+		sub: isZh ? '进化狂潮 · 补给争夺' : 'Evolution Surge · Supply Race',
 		accent: '#2fd4a7',
-		desc: '尸潮学会了进化。僵尸通过感染不断变异升级，获得更强的体魄与技能；人类则依靠空投补给与强化武器殊死一搏。进化的天平，由你亲手打破。',
-		feats: ['僵尸多阶段进化', '空投补给箱', '强化武器系统', '技能型变异体'],
+		desc: isZh
+			? '尸潮学会了进化。僵尸通过感染不断变异升级，获得更强的体魄与技能；人类则依靠空投补给与强化武器殊死一搏。进化的天平，由你亲手打破。'
+			: 'The horde learned to evolve. Zombies mutate and level up through infection, gaining stronger bodies and abilities, while humans fight back with airdropped supplies and upgraded weapons. Tip the scales of evolution yourself.',
+		feats: isZh
+			? ['僵尸多阶段进化', '空投补给箱', '强化武器系统', '技能型变异体']
+			: ['Multi-stage zombie evolution', 'Airdrop supply crates', 'Weapon upgrade system', 'Skill-based mutants'],
 	},
 	{
 		id: 'zm3',
 		tag: 'MODE 03',
-		name: '生化模式 Ⅲ',
-		sub: '英雄降临 · 背水一战',
+		name: isZh ? '生化模式 Ⅲ' : 'Zombie Mode Ⅲ',
+		sub: isZh ? '英雄降临 · 背水一战' : 'Heroes Arrive · Last Stand',
 		accent: '#ffb02e',
-		desc: '当幸存者的怒吼响彻战场，英雄应运而生。残局时刻人类可觉醒为英雄单位，手持专属神器逆转战局；尸群则以滔天怒气回应——最后的对决，没有退路。',
-		feats: ['英雄觉醒系统', '专属英雄武器', '僵尸怒气爆发', '终局逆转机制'],
+		desc: isZh
+			? '当幸存者的怒吼响彻战场，英雄应运而生。残局时刻人类可觉醒为英雄单位，手持专属神器逆转战局；尸群则以滔天怒气回应——最后的对决，没有退路。'
+			: 'When the survivors roar, heroes rise. In the endgame, a human may awaken as a hero unit wielding an exclusive artifact to turn the tide — answered by the horde’s surging rage. The final duel has no retreat.',
+		feats: isZh
+			? ['英雄觉醒系统', '专属英雄武器', '僵尸怒气爆发', '终局逆转机制']
+			: ['Hero awakening system', 'Exclusive hero weapons', 'Zombie rage burst', 'Endgame comeback mechanic'],
 	},
 	{
 		id: 'zmz',
 		tag: 'MODE Z',
-		name: '生化模式 Z',
-		sub: '无限进化 · 随机觉醒',
+		name: isZh ? '生化模式 Z' : 'Zombie Mode Z',
+		sub: isZh ? '无限进化 · 随机觉醒' : 'Endless Evolution · Random Awakening',
 		accent: '#c86bff',
-		desc: '每一局，都是全新的基因序列。等级成长搭配随机觉醒的变异能力，跳跃强化、神速、钢铁之躯……数十种能力自由组合，打造只属于你的终极变异体。',
-		feats: ['局内等级成长', '随机变异能力池', '能力自由组合', '每局全新体验'],
+		desc: isZh
+			? '每一局，都是全新的基因序列。等级成长搭配随机觉醒的变异能力，跳跃强化、神速、钢铁之躯……数十种能力自由组合，打造只属于你的终极变异体。'
+			: 'Every round is a brand-new gene sequence. In-match leveling pairs with randomly awakened mutations — super jump, extreme speed, iron body… dozens of abilities combine freely to forge your own ultimate mutant.',
+		feats: isZh
+			? ['局内等级成长', '随机变异能力池', '能力自由组合', '每局全新体验']
+			: ['In-match leveling', 'Random mutation pool', 'Free ability combos', 'A fresh run every round'],
 	},
 	{
 		id: 'zmu',
 		tag: 'UNION WAR',
-		name: '生化盟战',
-		sub: '阵营对决 · 全面开战',
+		name: isZh ? '生化盟战' : 'Zombie Union War',
+		sub: isZh ? '阵营对决 · 全面开战' : 'Faction Warfare · All-Out War',
 		accent: '#ff4d4d',
-		desc: '不再是逃与追的猫鼠游戏。人类军团与尸潮阵营正面碰撞，占领据点、击杀敌方、滚起雪球。这是属于两大阵营的全面战争——盟战已启，选边站队。',
-		feats: ['双阵营大规模团战', '据点占领机制', '阵营科技成长', 'AI 尸潮协同作战'],
+		desc: isZh
+			? '不再是逃与追的猫鼠游戏。人类军团与尸潮阵营正面碰撞，占领据点、击杀敌方、滚起雪球。这是属于两大阵营的全面战争——盟战已启，选边站队。'
+			: 'No longer a game of cat and mouse. The human legion meets the horde head-on: capture strongholds, eliminate the enemy, and snowball your advantage. This is total war between two factions — pick your side.',
+		feats: isZh
+			? ['双阵营大规模团战', '据点占领机制', '阵营科技成长', 'AI 尸潮协同作战']
+			: ['Large-scale two-faction battles', 'Stronghold capture', 'Faction tech progression', 'AI horde coordination'],
 	},
 ];
 
-const highlights = [
-	{ title: 'CS2 原生体验', desc: '基于 Counter-Strike 2 社区服务器框架深度定制，低延迟、高帧率，画质全面进化。' },
-	{ title: 'SwiftlyS2 驱动', desc: '构建于现代 C# 框架 SwiftlyS2 之上，直接调用 Source 2 原生接口，性能与内存安全兼得。' },
-	{ title: '五大经典玩法', desc: '生化 1/2/3、生化 Z、生化盟战一次集齐，CSOL 老玩家的青春全部还给你。' },
-	{ title: '持续更新', desc: '地图、武器、僵尸模型与平衡性持续迭代，社区反馈直达开发组。' },
-	{ title: '公平竞技', desc: '无数值付费，所有强度靠枪法与策略说话，绿色公平的游戏环境。' },
-	{ title: '开源友好', desc: '与 SwiftlyS2 生态一致，支持热重载、数据库、多语言与丰富的事件钩子。' },
-];
+const highlights = isZh
+	? [
+			{ title: 'CS2 原生体验', desc: '基于 Counter-Strike 2 社区服务器框架深度定制，低延迟、高帧率，画质全面进化。' },
+			{ title: 'SwiftlyS2 驱动', desc: '构建于现代 C# 框架 SwiftlyS2 之上，直接调用 Source 2 原生接口，性能与内存安全兼得。' },
+			{ title: '五大经典玩法', desc: '生化 1/2/3、生化 Z、生化盟战一次集齐，CSOL 老玩家的青春全部还给你。' },
+			{ title: '持续更新', desc: '地图、武器、僵尸模型与平衡性持续迭代，社区反馈直达开发组。' },
+			{ title: '公平竞技', desc: '无数值付费，所有强度靠枪法与策略说话，绿色公平的游戏环境。' },
+			{ title: '开源友好', desc: '与 SwiftlyS2 生态一致，支持热重载、数据库、多语言与丰富的事件钩子。' },
+		]
+	: [
+			{ title: 'Native CS2 Experience', desc: 'Deeply customized on the Counter-Strike 2 community server framework — low latency, high framerate, fully modernized visuals.' },
+			{ title: 'Powered by SwiftlyS2', desc: 'Built on the modern C# framework SwiftlyS2, calling Source 2 native interfaces directly for both performance and memory safety.' },
+			{ title: 'Five Classic Modes', desc: 'Zombie 1/2/3, Zombie Z and Zombie Union War gathered in one place — every CSOL veteran’s memories returned.' },
+			{ title: 'Actively Updated', desc: 'Maps, weapons, zombie models and balance iterate continuously, with community feedback going straight to the dev team.' },
+			{ title: 'Fair Play', desc: 'No pay-for-power. Every advantage comes from aim and strategy, in a clean and fair environment.' },
+			{ title: 'Open & Friendly', desc: 'Aligned with the SwiftlyS2 ecosystem: hot reload, databases, multi-language support and rich event hooks.' },
+		];
+
+// 界面文案
+const t = isZh
+	? {
+			title: 'ZombieCs — CS2 生化模式社区插件',
+			description:
+				'ZombieCs 是一款 CS2 社区服务器插件，参考 CSOL 生化模式1、生化模式2、生化模式3、生化模式Z 与生化盟战。',
+			wip: '正在开发中~ 玩法内容持续更新，敬请期待',
+			navModes: '游戏模式',
+			navFeatures: '插件特色',
+			navDocs: '插件文档',
+			navJoin: '立即加入',
+			langLabel: '语言切换',
+			heroBadge: 'SWIFTLYS2 · CS2 社区服务器插件',
+			heroLead:
+				'在 Counter-Strike 2 的战场上，生化模式 1 / 2 / 3、生化模式 Z、生化盟战，五大经典玩法。基于 SwiftlyS2 框架开发，尸潮再起，无处可逃。',
+			ctaJoin: '加入战场',
+			ctaModes: '查看游戏模式',
+			scrollHint: '▼ 向下滚动 ▼',
+			modesKicker: 'GAME MODES',
+			modesTitle: '五大生化玩法 · 经典感染',
+			modesLead: '从最初的原点守夜，到阵营全面开战——你记忆中的每一种尸潮，都在这里。',
+			featuresKicker: 'WHY ZOMBIECS',
+			featuresTitle: '不止是复刻，更是进化',
+			finalTitle: '尸潮已至，',
+			finalTitleAccent: '你准备好了吗？',
+			finalLead:
+				'搜索社区服务器浏览器中的「ZombieCs」，即刻加入这场跨越十年的生化盛宴。无论是死守到最后的人类，还是撕碎一切的尸王——传奇，由你书写。',
+			finalCta: '查看插件文档',
+			finalCommunity: '加入社区讨论',
+			footer: 'ZombieCs — 基于 SwiftlyS2 框架的 CS2 社区插件 · 本页面仅供玩家社区宣传使用',
+		}
+	: {
+			title: 'ZombieCs — CS2 Zombie Mode Community Plugin',
+			description:
+				'ZombieCs is a Counter-Strike 2 community server plugin recreating CSOL’s Zombie Mode 1, 2, 3, Zombie Mode Z and Zombie Union War.',
+			wip: 'Under development — gameplay is actively updated, stay tuned',
+			navModes: 'Game Modes',
+			navFeatures: 'Features',
+			navDocs: 'Docs',
+			navJoin: 'Join Now',
+			langLabel: 'Language',
+			heroBadge: 'SWIFTLYS2 · CS2 COMMUNITY SERVER PLUGIN',
+			heroLead:
+				'On the battlefield of Counter-Strike 2 — Zombie Mode 1 / 2 / 3, Zombie Mode Z and Zombie Union War. Five classic modes, built on the SwiftlyS2 framework. The horde rises again; there is nowhere to run.',
+			ctaJoin: 'Enter the Battlefield',
+			ctaModes: 'View Game Modes',
+			scrollHint: '▼ SCROLL DOWN ▼',
+			modesKicker: 'GAME MODES',
+			modesTitle: 'Five Zombie Modes · Classic Infection',
+			modesLead: 'From the first night watch at ground zero to full-scale faction warfare — every horde you remember lives here.',
+			featuresKicker: 'WHY ZOMBIECS',
+			featuresTitle: 'More Than a Remake — An Evolution',
+			finalTitle: 'The Horde Has Arrived. ',
+			finalTitleAccent: 'Are You Ready?',
+			finalLead:
+				'Search for “ZombieCs” in the community server browser and join this decade-spanning zombie feast. Whether you hold out as the last human or tear everything apart as the zombie king — the legend is yours to write.',
+			finalCta: 'Read the Docs',
+			finalCommunity: 'Join the Community',
+			footer: 'ZombieCs — a CS2 community plugin built on the SwiftlyS2 framework · This page is for community promotion only',
+		};
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang={isZh ? 'zh-CN' : 'en'}>
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>ZombieCs — CS2 生化模式社区插件</title>
-		<meta
-			name="description"
-			content="ZombieCs 是一款 CS2 社区服务器插件，参考 CSOL 生化模式1、生化模式2、生化模式3、生化模式Z 与生化盟战。"
-		/>
+		<link rel="alternate" hreflang="zh-CN" href="/" />
+		<link rel="alternate" hreflang="en" href="/en/" />
+		<link rel="alternate" hreflang="x-default" href="/" />
+		<title>{t.title}</title>
+		<meta name="description" content={t.description} />
 		<style>
 			:root {
 				--bg: #0a0d08;
@@ -552,20 +657,22 @@ const highlights = [
 
 		<div class="wip-bar">
 			<span class="dot"></span>
-			<span>正在开发中~ 玩法内容持续更新，敬请期待</span>
+			<span>{t.wip}</span>
 		</div>
 
 		<nav>
-			<a class="logo" href="/">ZOMBIE<em>CS</em></a>
+			<a class="logo" href={isZh ? '/' : '/en/'}>ZOMBIE<em>CS</em></a>
 			<ul class="nav-links">
-				<li><a href="#modes">游戏模式</a></li>
-				<li><a href="#features">插件特色</a></li>
-				<li><a href={DOCS_HOME}>插件文档</a></li>
-				<li><a href="#join">立即加入</a></li>
+				<li><a href="#modes">{t.navModes}</a></li>
+				<li><a href="#features">{t.navFeatures}</a></li>
+				<li><a href={DOCS_HOME}>{t.navDocs}</a></li>
+				<li><a href="#join">{t.navJoin}</a></li>
 			</ul>
-			<div class="lang-switch" role="group" aria-label="语言 / Language">
-				<span class="lang-active" aria-current="true">中文</span>
-				<a href="/en/overview" hreflang="en" lang="en">EN</a>
+			<div class="lang-switch" role="group" aria-label={t.langLabel}>
+				<span class="lang-active" aria-current="true" lang={LANG_CURRENT_HTML_LANG}>{LANG_CURRENT}</span>
+				<a href={ALT_HREF} hreflang={LANG_OTHER_HTML_LANG} lang={LANG_OTHER_HTML_LANG}>
+					{LANG_OTHER}
+				</a>
 			</div>
 		</nav>
 
@@ -583,25 +690,21 @@ const highlights = [
 					fill="#7ee23c"></path>
 				<circle cx="50" cy="50" r="16" stroke="#7ee23c" stroke-width="3" opacity="0.55"></circle>
 			</svg>
-			<div class="hero-badge">SWIFTLYS2 · CS2 社区服务器插件</div>
+			<div class="hero-badge">{t.heroBadge}</div>
 			<h1>ZOMBIE<span class="blood">CS</span></h1>
-			<p class="slogan">
-				在 <strong>Counter-Strike 2</strong> 的战场上，
-				<strong>生化模式 1 / 2 / 3</strong>、<strong>生化模式 Z</strong>、<strong>生化盟战</strong>，
-				五大经典玩法。基于 <strong>SwiftlyS2</strong> 框架开发，尸潮再起，无处可逃。
-			</p>
+			<p class="slogan">{t.heroLead}</p>
 			<div class="cta-row">
-				<a class="btn btn-primary" href="#join">加入战场</a>
-				<a class="btn btn-ghost" href="#modes">查看游戏模式</a>
+				<a class="btn btn-primary" href="#join">{t.ctaJoin}</a>
+				<a class="btn btn-ghost" href="#modes">{t.ctaModes}</a>
 			</div>
-			<div class="scroll-hint">▼ 向下滚动 ▼</div>
+			<div class="scroll-hint">{t.scrollHint}</div>
 		</header>
 
 		<section id="modes">
 			<div class="section-head">
-				<div class="kicker">GAME MODES</div>
-				<h2>五大生化玩法 · 经典感染</h2>
-				<p>从最初的原点守夜，到阵营全面开战——你记忆中的每一种尸潮，都在这里。</p>
+				<div class="kicker">{t.modesKicker}</div>
+				<h2>{t.modesTitle}</h2>
+				<p>{t.modesLead}</p>
 			</div>
 			{
 				modes.map((m) => (
@@ -626,8 +729,8 @@ const highlights = [
 
 		<section id="features">
 			<div class="section-head">
-				<div class="kicker">WHY ZOMBIECS</div>
-				<h2>不止是复刻，更是进化</h2>
+				<div class="kicker">{t.featuresKicker}</div>
+				<h2>{t.featuresTitle}</h2>
 			</div>
 			<div class="features">
 				{
@@ -642,19 +745,14 @@ const highlights = [
 		</section>
 
 		<section class="final-cta" id="join">
-			<h2>尸潮已至，<span>你准备好了吗？</span></h2>
-			<p>
-				搜索社区服务器浏览器中的「ZombieCs」，即刻加入这场跨越十年的生化盛宴。
-				无论是死守到最后的人类，还是撕碎一切的尸王——传奇，由你书写。
-			</p>
+			<h2>{t.finalTitle}<span>{t.finalTitleAccent}</span></h2>
+			<p>{t.finalLead}</p>
 			<div class="cta-row">
-				<a class="btn btn-primary" href={DOCS_HOME}>查看插件文档</a>
-				<a class="btn btn-ghost" href="#">加入社区讨论</a>
+				<a class="btn btn-primary" href={DOCS_HOME}>{t.finalCta}</a>
+				<a class="btn btn-ghost" href="#">{t.finalCommunity}</a>
 			</div>
 		</section>
 
-		<footer>
-			ZombieCs — 基于 SwiftlyS2 框架的 CS2 社区插件 · 本页面仅供玩家社区宣传使用
-		</footer>
+		<footer>{t.footer}</footer>
 	</body>
 </html>

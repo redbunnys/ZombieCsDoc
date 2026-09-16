@@ -1,10 +1,12 @@
 ---
 // 覆盖 Starlight 的 SiteTitle：站点根 `/` 是宣传落地页，
-// 因此把文档站左上角标题指向文档介绍页 `/overview`。
+// 因此把文档站左上角标题指向当前语言的文档介绍页（中文 `/overview`，英文 `/en/overview`）。
 const { title } = Astro.locals.starlightRoute.siteTitle ?? {};
+const isZh = (Astro.currentLocale ?? 'zh-CN').startsWith('zh');
+const homeHref = isZh ? '/overview' : '/en/overview';
 ---
 
-<a href="/overview" class="site-title sl-flex">
+<a href={homeHref} class="site-title sl-flex">
 	<span class="sl-flex astro-site-title">{title}</span>
 </a>
 
